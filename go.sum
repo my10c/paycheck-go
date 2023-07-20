@@ -1,0 +1,14 @@
+github.com/BurntSushi/toml v1.3.2 h1:o7IhLm0Msx3BaB+n3Ag7L8EVlByGnpq14C4YWiu/gL8=
+github.com/BurntSushi/toml v1.3.2/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbicEuybxQ=
+github.com/akamensky/argparse v1.4.0 h1:YGzvsTqCvbEZhL8zZu2AiA5nq805NZh75JNj4ajn1xc=
+github.com/akamensky/argparse v1.4.0/go.mod h1:S5kwC7IuDcEr5VeXtGPRVZ5o/FdhcMlQz4IZQuw64xA=
+github.com/mitchellh/go-ps v1.0.0 h1:i6ampVEEF4wQFF+bkYfwYgY+F/uYJDktmvLPf7qIgjc=
+github.com/mitchellh/go-ps v1.0.0/go.mod h1:J4lOc8z8yJs6vUwklHw2XEIiT4z4C40KtWVN3nvg8Pg=
+github.com/my10c/packages-go/format v0.0.0-20230717011209-51a83962742b h1:t2QmLYxL1p8xSlawZ779jb20+QjcOAPLgm4bIj/yaPY=
+github.com/my10c/packages-go/format v0.0.0-20230717011209-51a83962742b/go.mod h1:inFXTFTXKGF9FLodJX89FbY8H79J+O/pvTMcxH6Fk98=
+github.com/my10c/packages-go/is v0.0.0-20230717011209-51a83962742b h1:AiOVGnr2LOmHwTj7iqog38eLLRmC1bOw8SiGbyfs9Og=
+github.com/my10c/packages-go/is v0.0.0-20230717011209-51a83962742b/go.mod h1:JKZ52h1C1OCH38hP6RD2Ocx0eDFbXwhy7YZLyRFbPLM=
+github.com/my10c/packages-go/print v0.0.0-20230717011209-51a83962742b h1:w1TFPs2JNnO1yYyqrV08r2BLbzaEc9s6ciqnltvyfsY=
+github.com/my10c/packages-go/print v0.0.0-20230717011209-51a83962742b/go.mod h1:OMG/EviVM7GD0gp22TRQuydJW2RkXBjfeegp3bW5K6U=
+github.com/my10c/packages-go/spinner v0.0.0-20230717011209-51a83962742b h1:YHNE8AV6VGwLmpyIvLptyTORVpdLkx1DUwV8Bnvr3gw=
+github.com/my10c/packages-go/spinner v0.0.0-20230717011209-51a83962742b/go.mod h1:s5GnOLg3ytQP36cXLZ+eLBva7gBCo0y+C+RH4VJ23SA=
