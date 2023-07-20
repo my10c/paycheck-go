@@ -24,11 +24,11 @@ Arguments:
 ```
 
 ###
-Since taxes is adjusted based on the salary, the configs should be in this format
-
-*state* *salary*
-
-Example:
+Since taxes is adjusted based on the salary, the configs should be in this format\
+\
+**state** **salary**\
+\
+Example:\
 ```
 ca150
 co150
