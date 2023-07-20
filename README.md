@@ -25,7 +25,9 @@ Arguments:
 
 ###
 Since taxes is adjusted based on the salary, the configs should be in this format
-*state**salary*
+
+*state* *salary*
+
 Example:
 ```
 ca150
