@@ -30,6 +30,7 @@ go.work
 Makefile
 bin/*
 template/*
+work/*
 
 # binary files
 paycheck
