@@ -39,7 +39,8 @@ func main() {
 	s.Stop()
 
 	// get the configurations values
-	calculate.ShowCalc(c, p)
+	// calculate.ShowCalc(c, p)
+	calculate.BracketCalc(c, p)
 
 	fmt.Printf("\t%s\n", p.PrintLine(print.Purple, 60))
 	p.TheEnd()

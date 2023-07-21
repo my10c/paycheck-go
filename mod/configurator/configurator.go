@@ -27,32 +27,44 @@ type (
 		Salary				int
 		CostHouse			int
 		CostCar				int
+		StandardDeduction	int
 		State				string
 		Tax					map[string]float32
 		Insurance			map[string]int
+		Federal				map[string]float32
+		FederalBracket		[][]float32
+		StateBracket		[][]float32
 	}
 
 	State struct {
-		FederalTax			float32	`toml:"FederalTax,omitempty"`
-		StateTax			float32	`toml:"StateTax,omitempty"`
-		SocialSecurity		float32	`toml:"SocialSecurity,omitempty"`
-		Medicare			float32	`toml:"Medicare,omitempty"`
-		StateOtherTax		float32	`toml:"StateOtherTax,omitempty"`
+		StateOtherTax		float32		`toml:"StateOtherTax,omitempty"`
 	}
 
 	Insurance struct {
-		Medical		int	`toml:"Medical,omitempty"`
-		Dental		int	`toml:"Dental,omitempty"`
-		Vision		int	`toml:"Vision,omitempty"`
-		Pension		int	`toml:"Pension,omitempty"`
-		LongTerm	int	`toml:"LongTerm,omitempty"`
-		Life		int	`toml:"Life,omitempty"`
+		Medical		int					`toml:"Medical,omitempty"`
+		Dental		int					`toml:"Dental,omitempty"`
+		Vision		int					`toml:"Vision,omitempty"`
+		Pension		int					`toml:"Pension,omitempty"`
+		LongTerm	int					`toml:"LongTerm,omitempty"`
+		Life		int					`toml:"Life,omitempty"`
+	}
+
+	Federal struct {
+		SocialSecurity		float32		`toml:"SocialSecurity,omitempty"`
+		SocialSecurityMax	float32		`toml:"SocialSecurityMax,omitempty"`
+		Medicare			float32		`toml:"Medicare,omitempty"`
+	}
+
+	Bracket struct {
+		TaxBracket			[][]float32	`toml:"TaxBracket,omitempty"`	
 	}
 
 	tomlConfig struct {
-		Base		map[string]int			`toml:"base,omitempty"`
-		State		map[string]State		`toml:"state,omitempty"`
-		Insurance	map[string]int			`toml:"insurance,omitempty"`
+		Base		map[string]int		`toml:"base,omitempty"`
+		State		map[string]State	`toml:"state,omitempty"`
+		Insurance	map[string]int		`toml:"insurance,omitempty"`
+		Federal		map[string]float32	`toml:"federal,omitempty"`
+		Bracket		map[string]Bracket	`toml:"bracket,omitempty"`
 	}
 )
 
@@ -93,7 +105,7 @@ func (c *Config) InitializeArgs(p *print.Print) {
 
 	state := parser.String("s", "state",
 		&argparse.Options{
-			Required:	true,
+			Required:	false,
 			Help:		"The state where taxes is collected, required",
 		})
 
@@ -129,16 +141,23 @@ func (c *Config) InitializeArgs(p *print.Print) {
 		os.Exit(0)
 	}
 
-	if _, ok, _ := i.IsExist(*configFile, "file"); !ok {
-		p.PrintRed("Configuration file " + *configFile + " does not exist\n")
-		os.Exit(1)
-	}
-
 	configFileSet	= parser.GetArgs()[1].GetParsed()
 	salarySet		= parser.GetArgs()[2].GetParsed()
 	stateSet		= parser.GetArgs()[3].GetParsed()
 	houseSet		= parser.GetArgs()[4].GetParsed()
 	carSet			= parser.GetArgs()[5].GetParsed()
+
+	if !stateSet  {
+		p.PrintBlue(vars.MyInfo)
+		p.PrintRed("\n\tThe flags [-s|--state] is required\n\n")
+		p.PrintGreen(parser.Usage(err))
+		os.Exit(1)
+	}
+
+	if _, ok, _ := i.IsExist(*configFile, "file"); !ok {
+		p.PrintRed("Configuration file " + *configFile + " does not exist\n")
+		os.Exit(1)
+	}
 
 	c.Salary, _		= strconv.Atoi(*salary)
 	c.CostHouse, _	= strconv.Atoi(*costHouse)
@@ -158,6 +177,9 @@ func (c *Config) SetCalculationSettings(p *print.Print) {
 		os.Exit(1)
 	}
 
+	// Standard Deduction
+	c.StandardDeduction = configValues.Base["StandardDeduction"]
+
 	// ignore value from config the flag was given : -s, H and C
 	if !salarySet {
 		c.Salary = configValues.Base["Salary"]
@@ -171,28 +193,14 @@ func (c *Config) SetCalculationSettings(p *print.Print) {
 		c.CostCar = configValues.Base["CostCar"]
 	}
 
-	// set the federal and state taxes
-	c.Tax["FederalTax"] = configValues.State[c.State].FederalTax
-	c.Tax["StateTax"] = configValues.State[c.State].StateTax
-	c.Tax["SocialSecurity"] = configValues.State[c.State].SocialSecurity
-	c.Tax["Medicare"] = configValues.State[c.State].Medicare
-	c.Tax["StateOtherTax"] = configValues.State[c.State].StateOtherTax
-
 	// set the insurances cost
 	for _, field := range vars.CalcInsurance {
 		c.Insurance[field] = configValues.Insurance[field]
 	}
 
-	switch c.State {
-		case "co140": c.Salary = 140000
-		case "co150": c.Salary = 150000
-		case "co160": c.Salary = 160000
-		case "co180": c.Salary = 180000
-		case "co200": c.Salary = 200000
-
-		case "ca150": c.Salary = 150000
-		case "ca160": c.Salary = 160000
-		case "ca180": c.Salary = 180000
-		case "ca200": c.Salary = 200000
-	}
+	// use bracket for tax calculation
+	c.Tax["StateOtherTax"] = configValues.State[c.State].StateOtherTax
+	c.Federal = configValues.Federal
+	c.FederalBracket = configValues.Bracket["federal"].TaxBracket
+	c.StateBracket = configValues.Bracket[c.State].TaxBracket
 }
