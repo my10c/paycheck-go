@@ -20,29 +20,30 @@ import (
 // calculate based on brackets
 func BracketCalc(c *configurator.Config, p *print.Print) {
 
-	var takeHone float32 = 0
-	var taxTotal float32 = 0
+	var takeHone float64 = 0
+	var taxTotal float64 = 0
 
-	var SocialSecurity float32 = 0
-	var Medicare float32 = 0
-	var insuranceTotal int = 0
+	var SocialSecurity float64 = 0
+	var Medicare float64 = 0
+	var insuranceTotal float64 = 0
 
 	// use in the loops
 	var idx int
-	var over float32
-	var overTax float32
-	var totalTax float32
-	var percentTax float32
+	var over float64
+	var overTax float64
+	var totalTax float64
+	var percentTax float64
 
-	var overState float32
-	var overTaxState float32
-	var totalTaxState float32
-	var percentTaxState float32
+	var overState float64
+	var overTaxState float64
+	var totalTaxState float64
+	var percentTaxState float64
 
 	monthlyCost := (c.CostHouse + c.CostCar)
 	federalBracket := c.FederalBracket
 	stateBracket   := c.StateBracket
-	taxableSalary  := int64(c.Salary) - int64(c.Federal["StandardDeduction"])
+	fedTaxableSalary := int64(c.Salary) - int64(c.Federal["StandardDeduction"])
+	stateTaxableSalary := int64(c.Salary) - int64(c.StatedDeduction)
 
 	fmt.Printf("\t%s Before taxes: %s\n",
 		p.PrintLine(print.Purple, 23),
@@ -52,8 +53,13 @@ func BracketCalc(c *configurator.Config, p *print.Print) {
 	p.PrintGreen(fmt.Sprintf("\tYearly salary\t\t\t  $%12s\n",
 		format.Format(int64(c.Salary))),
 	)
-	p.PrintGreen(fmt.Sprintf("\tTaxable salary\t\t\t  $%12s\n",
-		format.Format(taxableSalary)),
+	p.PrintGreen(fmt.Sprintf("\tFederal Taxable salary\t\t  $%12s / -$%s\n",
+		format.Format(fedTaxableSalary),
+		format.Format(int64(c.Federal["StandardDeduction"]))),
+	)
+	p.PrintGreen(fmt.Sprintf("\tState Taxable salary\t\t  $%12s / -$%s\n",
+		format.Format(stateTaxableSalary),
+		format.Format(int64(c.StatedDeduction))),
 	)
 	p.PrintGreen(fmt.Sprintf("\tMonthly salary\t\t\t  $%12s\n",
 		format.Format(int64(c.Salary/12))),
@@ -73,9 +79,9 @@ func BracketCalc(c *configurator.Config, p *print.Print) {
 
 	for idx, _ = range federalBracket {
 		for _ = range federalBracket[idx]{
-			if	taxableSalary > int64(federalBracket[idx][2]) &&
-				taxableSalary <  int64(federalBracket[idx][3]) {
-				over = float32(c.Salary) - federalBracket[idx][2]
+			if	fedTaxableSalary > int64(federalBracket[idx][2]) &&
+				fedTaxableSalary <  int64(federalBracket[idx][3]) {
+				over = float64(c.Salary) - federalBracket[idx][2]
 				overTax = (over * federalBracket[idx][1]) / 100
 				//bi-weekly
 				totalTax = (overTax + federalBracket[idx][0]) / 24
@@ -90,9 +96,9 @@ func BracketCalc(c *configurator.Config, p *print.Print) {
 
 	for idx, _  = range stateBracket {
 		for _ = range stateBracket[idx] {
-			if	int64(c.Salary) > int64(stateBracket[idx][2]) &&
-				int64(c.Salary) <  int64(stateBracket[idx][3]) {
-				overState = float32(c.Salary) - stateBracket[idx][2]
+			if	stateTaxableSalary > int64(stateBracket[idx][2]) &&
+				stateTaxableSalary <  int64(stateBracket[idx][3]) {
+				overState = float64(c.Salary) - stateBracket[idx][2]
 				overTaxState = (overState * stateBracket[idx][1]) / 100
 				//bi-weekly
 				totalTaxState = (overTaxState + stateBracket[idx][0]) / 24
@@ -105,19 +111,19 @@ func BracketCalc(c *configurator.Config, p *print.Print) {
 		"StateTax", percentTaxState, format.Format(int64(totalTaxState))),
 	)
 
-	if taxableSalary > int64(c.Federal["SocialSecurityMax"]) {
+	if fedTaxableSalary > int64(c.Federal["SocialSecurityMax"]) {
 		SocialSecurity =
-			((float32(c.Federal["SocialSecurityMax"]) * c.Federal["SocialSecurity"]) / 100) / 24
+			((float64(c.Federal["SocialSecurityMax"]) * c.Federal["SocialSecurity"]) / 100) / 24
 	} else {
 		SocialSecurity =
-			((float32(taxableSalary) * c.Federal["SocialSecurity"]) / 100) / 24
+			((float64(fedTaxableSalary) * c.Federal["SocialSecurity"]) / 100) / 24
 	}
 	p.PrintYellow(fmt.Sprintf("\t%14s (%v%%)\t  $ %11s\n",
 		"SocialSecurity", c.Federal["SocialSecurity"], format.Format(int64(SocialSecurity))),
 	)
 
 	Medicare =
-		((float32(taxableSalary) * c.Federal["Medicare"])  / 100) / 24
+		((float64(fedTaxableSalary) * c.Federal["Medicare"])  / 100) / 24
 	p.PrintYellow(fmt.Sprintf("\t%14s (%v%%)\t  $ %11s\n",
 		"Medicare", c.Federal["Medicare"], format.Format(int64(Medicare))),
 	)
@@ -132,25 +138,25 @@ func BracketCalc(c *configurator.Config, p *print.Print) {
 	)
 	insuranceTotal = 0
 	for field, _ := range c.Insurance {
-		p.PrintBlue(fmt.Sprintf("\t%18s\t  $ %8d\n",
-			field, c.Insurance[field]),
+		p.PrintBlue(fmt.Sprintf("\t%18s\t  $ %11s\n",
+			field, format.Format(int64(c.Insurance[field]))),
 		)
 		insuranceTotal += c.Insurance[field]
 	}
 	p.PrintRed(fmt.Sprintf("\tTotal $%s\n", format.Format(int64(insuranceTotal))))
 	fmt.Printf("\t%s\n", p.PrintLine(print.Purple, 60))	
 
-	taxTotal = float32(totalTax + totalTaxState + SocialSecurity + Medicare )
-	takeHone =	float32(c.Salary/24) - taxTotal - float32(insuranceTotal)
-	afterCost := takeHone - float32(monthlyCost/ 2)
+	taxTotal = float64(totalTax + totalTaxState + SocialSecurity + Medicare )
+	takeHone =	float64(c.Salary/24) - taxTotal - float64(insuranceTotal)
+	afterCost := takeHone - float64(monthlyCost/ 2)
 
-	p.PrintGreen(fmt.Sprintf("\t(approx.) Bring home salary : $%s bi-weekly, $%s monthly\n",
+	p.PrintGreen(fmt.Sprintf("\t(approx.) Bring home salary:\n\t\t\tbi-weekly : $%s\n\t\t\tmonthly   : $%s\n",
 		format.Format(int64(takeHone)),
 		format.Format(int64(takeHone * 2))),
 	)
 
 	fmt.Printf("\t%s\n", p.PrintLine(print.Purple, 60))
-	p.PrintGreen(fmt.Sprintf("\t(approx.) After costs       : $%s bi-weekly, $%s monthly\n",
+	p.PrintGreen(fmt.Sprintf("\t(approx.) After house and car costs:\n\t\t\tbi-weekly : $%s\n\t\t\tmonthly   : $%s\n",
 			format.Format(int64(afterCost)),
 			format.Format(int64(afterCost * 2))),
 	)

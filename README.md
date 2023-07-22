@@ -49,3 +49,26 @@ __** The TAX schedule brackets in the example might not be 100% accurate  **__
 - Taxable income is use to calculate the State taxes! __** could be wrong for other states then CO **__
 - The results are approximately, the result in reality should be a bit higher 
 
+
+### Build or run the code the code
+To build the code into a single binary as simple as
+```
+go build -o paycheck paycheck.go
+```
+If everything is well, then this will produce a binary called **paycheck** 
+
+To run the code
+```
+go run paycheck.go <flags...flags>
+```
+
+
+### TODO / *wishlist*
+
+
+#### IDEA:
+let me know if you have any request bug fix 👻 😎
+
+
+### The End
+Your friendly BOFH 🦄 😈          

@@ -15,6 +15,7 @@ import (
 
 	"vars"
 
+	"github.com/my10c/packages-go/format"
 	"github.com/my10c/packages-go/is"
 	"github.com/my10c/packages-go/print"
 
@@ -26,24 +27,32 @@ type (
 	Config struct {
 		ConfigFile			string
 		State				string
-		Salary				int
-		CostHouse			int
-		CostCar				int
-		Insurance			map[string]int
-		Federal				map[string]float32
-		FederalBracket		[][]float32
-		StateBracket		[][]float32
+		Salary				float64
+		MaxSalary			float64
+		CostHouse			float64
+		CostCar				float64
+		Insurance			map[string]float64
+		Federal				map[string]float64
+		FederalBracket		[][]float64
+		StateBracket		[][]float64
+		StatedDeduction		float64
+	}
+
+	State struct {
+		StatedDeduction		float64	`toml:"StatedDeduction,omitempty"`
+		PersonalExemption	float64	`toml:"PersonalExemption,omitempty"`
 	}
 
 	Bracket struct {
-		TaxBracket			[][]float32	`toml:"TaxBracket"`
+		TaxBracket			[][]float64	`toml:"TaxBracket"`
 	}
 
 	tomlConfig struct {
 		Location	map[string]string	`toml:"location"`
-		Base		map[string]int		`toml:"base"`
-		Insurance	map[string]int		`toml:"insurance"`
-		Federal		map[string]float32	`toml:"federal"`
+		Base		map[string]float64	`toml:"base"`
+		Insurance	map[string]float64	`toml:"insurance"`
+		State		map[string]State	`toml:"state"`
+		Federal		map[string]float64	`toml:"federal"`
 		Bracket		map[string]Bracket	`toml:"bracket"`
 	}
 )
@@ -51,6 +60,7 @@ type (
 var (
 	configFileSet	bool
 	salarySet		bool
+	maxSalarySet	bool
 	stateSet		bool
 	houseSet		bool
 	carSet			bool
@@ -60,7 +70,7 @@ var (
 func Configurator() *Config {
 	// the rest of the values will be filled from the given configuration file
 	return &Config{
-		Insurance:	make(map[string]int),
+		Insurance:	make(map[string]float64),
 	}
 }
 
@@ -80,6 +90,12 @@ func (c *Config) InitializeArgs(p *print.Print) {
 		&argparse.Options{
 			Required: false,
 			Help:		"The yearly salary before tax, required if not set in the configuration file",
+		})
+
+	maxSalary := parser.String("m", "maxsalary",
+		&argparse.Options{
+			Required:	false,
+			Help:		"The maximum allowed salary value",
 		})
 
 	state := parser.String("s", "state",
@@ -122,18 +138,20 @@ func (c *Config) InitializeArgs(p *print.Print) {
 
 	configFileSet	= parser.GetArgs()[1].GetParsed()
 	salarySet		= parser.GetArgs()[2].GetParsed()
-	stateSet		= parser.GetArgs()[3].GetParsed()
-	houseSet		= parser.GetArgs()[4].GetParsed()
-	carSet			= parser.GetArgs()[5].GetParsed()
+	maxSalarySet	= parser.GetArgs()[3].GetParsed()
+	stateSet		= parser.GetArgs()[4].GetParsed()
+	houseSet		= parser.GetArgs()[5].GetParsed()
+	carSet			= parser.GetArgs()[6].GetParsed()
 
 	if _, ok, _ := i.IsExist(*configFile, "file"); !ok {
 		p.PrintRed("Configuration file " + *configFile + " does not exist\n")
 		os.Exit(1)
 	}
 
-	c.Salary, _		= strconv.Atoi(*salary)
-	c.CostHouse, _	= strconv.Atoi(*costHouse)
-	c.CostCar, _	= strconv.Atoi(*costCar)
+	c.Salary, _		= strconv.ParseFloat(*salary, 64)
+	c.MaxSalary, _	= strconv.ParseFloat(*maxSalary, 64)
+	c.CostHouse, _	= strconv.ParseFloat(*costHouse, 64)
+	c.CostCar, _	= strconv.ParseFloat(*costCar, 64)
 	c.ConfigFile	= *configFile
 	c.State			= strings.ToLower(*state)
 }
@@ -165,9 +183,26 @@ func (c *Config) SetCalculationSettings(p *print.Print) {
 	if !salarySet {
 		c.Salary = configValues.Base["Salary"]
 	}
-	// need state so check after state was set
+	// need salary in configuration file if not given on the command line
 	if configValues.Base["Salary"] == 0  && !salarySet {
 		p.PrintRed("\tConfiguration file error: Salary is required\n")
+		os.Exit(1)
+	}
+
+	// set max salary first we will need for next checks
+	if !maxSalarySet {
+		c.MaxSalary = configValues.Base["MaxSalary"]
+	}
+	// need max salary in configuration file
+	if configValues.Base["MaxSalary"] == 0  && !maxSalarySet {
+		p.PrintRed("\tConfiguration file error: MaxSalary is required\n")
+		os.Exit(1)
+	}
+
+	if c.Salary > c.MaxSalary {
+		errMsg = fmt.Sprintf("\tMax Salary is configured to max $%v\n",
+			format.Format(int64(c.MaxSalary)))
+		p.PrintRed(errMsg)
 		os.Exit(1)
 	}
 
@@ -211,6 +246,10 @@ func (c *Config) SetCalculationSettings(p *print.Print) {
 	for field, _ := range configValues.Insurance {
 		c.Insurance[field] = configValues.Insurance[field]
 	}
+
+	// get the state Standard Deduction and PersonalExemption
+	c.StatedDeduction = configValues.State[c.State].StatedDeduction
+	c.StatedDeduction += configValues.State[c.State].PersonalExemption
 
 	// use bracket for tax calculation
 	c.Federal = configValues.Federal
