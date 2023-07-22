@@ -24,22 +24,28 @@ Arguments:
 
 ```
 
-### Example
-Look in the example director of a working configuration for the states of Colorado and California 
+#### Example
+Look in the example directory of a working configuration for the states of Colorado and California 
 
 The brackets were taken from: 
+
 [Colorado](https://leg.colorado.gov/agencies/legislative-council-staff/individual-income-tax%C2%A0) 
 
 and 
 
 [California](https://www.ftb.ca.gov/forms/2022/2022-540-tax-rate-schedules.pdf) 
-__** California is 2022, I have not found the oficial 2023 schedule **__
 
-### Tax Brackets and Tax Calculation
-- the configuration used the Married Filing Jointly Tax Brackets bracket
-- Allowance is set to 1 for Federal, State and local
-- Insurance is Pre-Tax
-- Taxable income is use base on the Standard Deduction for Married Filing Jointly
+usefull link 
+
+[All States as January 1, 2023](https://taxfoundation.org/state-income-tax-rates-2023/) 
+
+__** The TAX schedule brackets in the example might not be 100% accurate  **__
+
+#### Tax Brackets and Tax Calculation
+- The Tax Brackets used if for __** Married Filing Jointly **__
+- Allowance is set to 1 for Federal, State and local 
+- Insurance is Pre-Tax 
+- Taxable income is use base on the Standard Deduction for Married Filing Jointly 
 - Taxable income is use to calculate the State taxes! __** could be wrong for other states then CO **__
-
+- The results are approximately, the result in reality should be a bit higher 
 

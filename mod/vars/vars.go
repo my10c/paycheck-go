@@ -16,7 +16,7 @@ import (
 )
 
 var (
-	MyVersion   = "0.0.2"
+	MyVersion   = "0.0.3"
 	now         = time.Now()
 	MyProgname  = path.Base(os.Args[0])
 	myAuthor    = "Luc Suryo"
@@ -30,15 +30,9 @@ var (
 	// Default configuration file
 	ConfigFile = "/usr/local/etc/paycheck/paycheck.conf"
 
-	CalcBase = []string{"Salary", "CostHouse", "CostCar",
-	}
-
-	CalcTax = []string{"FederalTax", "StateTax",
-		"SocialSecurity", "Medicare", "StateOtherTax",
-	}
-
-	CalcInsurance = []string{
-		"Medical", "Dental", "Vision",
-		"401k", "LongTerm", "Life",
+	// required values
+	CalcTax = []string{
+		"SocialSecurity", "SocialSecurityMax",
+		"Medicare", "StandardDeduction",
 	}
 )

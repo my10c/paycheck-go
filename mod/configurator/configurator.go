@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 
 	"vars"
 
@@ -22,49 +23,28 @@ import (
 )
 
 type (
-   Config struct {
+	Config struct {
 		ConfigFile			string
+		State				string
 		Salary				int
 		CostHouse			int
 		CostCar				int
-		StandardDeduction	int
-		State				string
-		Tax					map[string]float32
 		Insurance			map[string]int
 		Federal				map[string]float32
 		FederalBracket		[][]float32
 		StateBracket		[][]float32
 	}
 
-	State struct {
-		StateOtherTax		float32		`toml:"StateOtherTax,omitempty"`
-	}
-
-	Insurance struct {
-		Medical		int					`toml:"Medical,omitempty"`
-		Dental		int					`toml:"Dental,omitempty"`
-		Vision		int					`toml:"Vision,omitempty"`
-		Pension		int					`toml:"Pension,omitempty"`
-		LongTerm	int					`toml:"LongTerm,omitempty"`
-		Life		int					`toml:"Life,omitempty"`
-	}
-
-	Federal struct {
-		SocialSecurity		float32		`toml:"SocialSecurity,omitempty"`
-		SocialSecurityMax	float32		`toml:"SocialSecurityMax,omitempty"`
-		Medicare			float32		`toml:"Medicare,omitempty"`
-	}
-
 	Bracket struct {
-		TaxBracket			[][]float32	`toml:"TaxBracket,omitempty"`	
+		TaxBracket			[][]float32	`toml:"TaxBracket"`
 	}
 
 	tomlConfig struct {
-		Base		map[string]int		`toml:"base,omitempty"`
-		State		map[string]State	`toml:"state,omitempty"`
-		Insurance	map[string]int		`toml:"insurance,omitempty"`
-		Federal		map[string]float32	`toml:"federal,omitempty"`
-		Bracket		map[string]Bracket	`toml:"bracket,omitempty"`
+		Location	map[string]string	`toml:"location"`
+		Base		map[string]int		`toml:"base"`
+		Insurance	map[string]int		`toml:"insurance"`
+		Federal		map[string]float32	`toml:"federal"`
+		Bracket		map[string]Bracket	`toml:"bracket"`
 	}
 )
 
@@ -80,7 +60,6 @@ var (
 func Configurator() *Config {
 	// the rest of the values will be filled from the given configuration file
 	return &Config{
-		Tax: 		make(map[string]float32),
 		Insurance:	make(map[string]int),
 	}
 }
@@ -100,19 +79,19 @@ func (c *Config) InitializeArgs(p *print.Print) {
 	salary := parser.String("S", "salary",
 		&argparse.Options{
 			Required: false,
-			Help:		"The yearly salary before tax",
+			Help:		"The yearly salary before tax, required if not set in the configuration file",
 		})
 
 	state := parser.String("s", "state",
 		&argparse.Options{
 			Required:	false,
-			Help:		"The state where taxes is collected, required",
+			Help:		"The state where taxes is collected, required if not set in the configuration file",
 		})
 
 	costHouse := parser.String("H", "house",
 		&argparse.Options{
 			Required:	false,
-			Help:		"The monthly house cost/mortgage",
+			Help:		"The monthly house rent/mortgage",
 		})
 
 	costCar := parser.String("C", "car",
@@ -147,13 +126,6 @@ func (c *Config) InitializeArgs(p *print.Print) {
 	houseSet		= parser.GetArgs()[4].GetParsed()
 	carSet			= parser.GetArgs()[5].GetParsed()
 
-	if !stateSet  {
-		p.PrintBlue(vars.MyInfo)
-		p.PrintRed("\n\tThe flags [-s|--state] is required\n\n")
-		p.PrintGreen(parser.Usage(err))
-		os.Exit(1)
-	}
-
 	if _, ok, _ := i.IsExist(*configFile, "file"); !ok {
 		p.PrintRed("Configuration file " + *configFile + " does not exist\n")
 		os.Exit(1)
@@ -163,11 +135,12 @@ func (c *Config) InitializeArgs(p *print.Print) {
 	c.CostHouse, _	= strconv.Atoi(*costHouse)
 	c.CostCar, _	= strconv.Atoi(*costCar)
 	c.ConfigFile	= *configFile
-	c.State			= *state
+	c.State			= strings.ToLower(*state)
 }
 
 // function to add the values to the Config object from the configuration file
 func (c *Config) SetCalculationSettings(p *print.Print) {
+	var errMsg string
 
 	var configValues tomlConfig
 
@@ -177,14 +150,42 @@ func (c *Config) SetCalculationSettings(p *print.Print) {
 		os.Exit(1)
 	}
 
-	// Standard Deduction
-	c.StandardDeduction = configValues.Base["StandardDeduction"]
+	// set state first we will need for next checks
+	if !stateSet {
+		c.State = strings.ToLower(configValues.Location["State"])
+	}
 
-	// ignore value from config the flag was given : -s, H and C
+	// need state so check after state was set
+	if configValues.Location["State"] == "" && !stateSet {
+		p.PrintRed("\tConfiguration file error: State is required\n")
+		os.Exit(1)
+	}
+
+	// set salary first we will need for next checks
 	if !salarySet {
 		c.Salary = configValues.Base["Salary"]
 	}
-	
+	// need state so check after state was set
+	if configValues.Base["Salary"] == 0  && !salarySet {
+		p.PrintRed("\tConfiguration file error: Salary is required\n")
+		os.Exit(1)
+	}
+
+	// check we have the required values
+	if len(configValues.Bracket["federal"].TaxBracket) == 0 {
+		p.PrintRed("\tConfiguration file error: Federal tax brackets is required\n")
+		os.Exit(1)
+	}
+
+	// need state so check after state was set
+	if len(configValues.Bracket[c.State].TaxBracket) == 0 {
+		errMsg = fmt.Sprintf("\tConfiguration file error: state %v tax brackets is required\n",
+			strings.ToUpper(c.State))
+		p.PrintRed(errMsg)
+		os.Exit(1)
+	}
+
+	// set values from command line
 	if !houseSet {
 		c.CostHouse = configValues.Base["CostHouse"]
 	}
@@ -193,13 +194,25 @@ func (c *Config) SetCalculationSettings(p *print.Print) {
 		c.CostCar = configValues.Base["CostCar"]
 	}
 
+	// make sure federal is set properly
+	var erroed bool = false
+	for _, field := range vars.CalcTax {
+		if configValues.Federal[field] == 0 {
+			errMsg = fmt.Sprintf("\tConfiguration file error: federal %v is required\n", field)
+			p.PrintRed(errMsg)
+			erroed = true
+		}
+	}
+	if erroed {
+		os.Exit(1)
+	}
+
 	// set the insurances cost
-	for _, field := range vars.CalcInsurance {
+	for field, _ := range configValues.Insurance {
 		c.Insurance[field] = configValues.Insurance[field]
 	}
 
 	// use bracket for tax calculation
-	c.Tax["StateOtherTax"] = configValues.State[c.State].StateOtherTax
 	c.Federal = configValues.Federal
 	c.FederalBracket = configValues.Bracket["federal"].TaxBracket
 	c.StateBracket = configValues.Bracket[c.State].TaxBracket
