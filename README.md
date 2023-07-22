@@ -37,7 +37,7 @@ and
 
 usefull link 
 
-[All States as January 1, 2023](https://taxfoundation.org/state-income-tax-rates-2023/) 
+[All States Tax Brackets as January 1, 2023](https://taxfoundation.org/state-income-tax-rates-2023/) 
 
 __** The TAX schedule brackets in the example might not be 100% accurate  **__
 
