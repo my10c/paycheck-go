@@ -156,7 +156,7 @@ func BracketCalc(c *configurator.Config, p *print.Print) {
 	)
 
 	fmt.Printf("\t%s\n", p.PrintLine(print.Purple, 60))
-	p.PrintGreen(fmt.Sprintf("\t(approx.) After house and car costs:\n\t\t\tbi-weekly : $%s\n\t\t\tmonthly   : $%s\n",
+	p.PrintGreen(fmt.Sprintf("\t(approx.) After house and car payment:\n\t\t\tbi-weekly : $%s\n\t\t\tmonthly   : $%s\n",
 			format.Format(int64(afterCost)),
 			format.Format(int64(afterCost * 2))),
 	)
