@@ -3,8 +3,8 @@ My Salary Calculator
 
 ```
 usage: paycheck [-h|--help] [-c|--configFile "<value>"] [-S|--salary "<value>"]
-                [-s|--state "<value>"] [-H|--house "<value>"] [-C|--car
-                "<value>"] [-v|--version]
+                [-m|--maxsalary "<value>"] [-s|--state "<value>"] [-H|--house
+                "<value>"] [-C|--car "<value>"] [-v|--version]
 
                 Simple script to calculate bi-weekly salary before and after
                 tax 😁
@@ -14,14 +14,14 @@ Arguments:
   -h  --help        Print help information
   -c  --configFile  Configuration file to be use. Default:
                     /usr/local/etc/paycheck/paycheck.conf
-  -S  --salary      The yearly salary before tax, required if no set in the
+  -S  --salary      The yearly salary before tax, required if not set in the
                     configuration file
-  -s  --state       The state where taxes is collected, required if no set in
+  -m  --maxsalary   The maximum allowed salary value
+  -s  --state       The state where taxes is collected, required if not set in
                     the configuration file
   -H  --house       The monthly house rent/mortgage
   -C  --car         The monthly cars payment
   -v  --version     Show version
-
 ```
 
 #### Example
