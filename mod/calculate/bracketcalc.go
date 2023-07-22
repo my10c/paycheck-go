@@ -32,7 +32,8 @@ func BracketCalc(c *configurator.Config, p *print.Print) {
 	var idx int
 	var over float64
 	var overTax float64
-	var totalTax float64
+	var fedTotalTax float64
+	var stateTotalTax float64
 	var percentTax float64
 
 	monthlyCost := (c.CostHouse + c.CostCar)
@@ -82,20 +83,20 @@ func BracketCalc(c *configurator.Config, p *print.Print) {
 				over = float64(c.Salary) - federalBracket[idx][2]
 				overTax = (over * federalBracket[idx][1]) / 100
 				//bi-weekly
-				totalTax = (overTax + federalBracket[idx][0]) / 24
+				fedTotalTax = (overTax + federalBracket[idx][0]) / 24
 				// percentTax = federalBracket[idx][1]
 				break
 			}
 		}
 	}
 	// effective tax in present
-	percentTax = float64((totalTax * 24 ) / c.Salary) * 100
+	percentTax = float64((fedTotalTax * 24 ) / c.Salary) * 100
 
 	p.PrintYellow(fmt.Sprintf("\t%14s (%.1f%%)\t  $ %6s  / $ %6s / $ %6s \n",
 		"FederalTax", percentTax,
-		format.Format(int64(totalTax)),
-		format.Format(int64(totalTax * 2)),
-		format.Format(int64(totalTax * 24))),
+		format.Format(int64(fedTotalTax)),
+		format.Format(int64(fedTotalTax * 2)),
+		format.Format(int64(fedTotalTax * 24))),
 	)
 
 	for idx, _  = range stateBracket {
@@ -105,20 +106,20 @@ func BracketCalc(c *configurator.Config, p *print.Print) {
 				over = float64(c.Salary) - stateBracket[idx][2]
 				overTax = (over * stateBracket[idx][1]) / 100
 				//bi-weekly
-				totalTax = (overTax + stateBracket[idx][0]) / 24
+				stateTotalTax = (overTax + stateBracket[idx][0]) / 24
 				// percentTax = stateBracket[idx][1]
 				break
 			}
 		}
 	}
 	// effective tax in present
-	percentTax = float64((totalTax * 24 ) / c.Salary) * 100
+	percentTax = float64((stateTotalTax * 24 ) / c.Salary) * 100
 
 	p.PrintYellow(fmt.Sprintf("\t%14s (%.1f%%)\t  $ %6s  / $ %6s / $ %6s \n",
 		"StateTax", percentTax,
-		format.Format(int64(totalTax)),
-		format.Format(int64(totalTax * 2)),
-		format.Format(int64(totalTax * 24))),
+		format.Format(int64(stateTotalTax)),
+		format.Format(int64(stateTotalTax * 2)),
+		format.Format(int64(stateTotalTax * 24))),
 	)
 
 	if fedTaxableSalary > int64(c.Federal["SocialSecurityMax"]) {
@@ -146,7 +147,7 @@ func BracketCalc(c *configurator.Config, p *print.Print) {
 		format.Format(int64(Medicare * 23))),
 	)
 
-	totalAll := totalTax + totalTax + SocialSecurity + Medicare
+	totalAll := fedTotalTax + stateTotalTax + SocialSecurity + Medicare
 	p.PrintRed(fmt.Sprintf("\tTotal $%s / $%s / $%s\n",
 		format.Format(int64(totalAll)),
 		format.Format(int64(totalAll * 2)),
@@ -176,7 +177,7 @@ func BracketCalc(c *configurator.Config, p *print.Print) {
 		format.Format(int64(insuranceTotal * 2 )),
 		format.Format(int64(insuranceTotal * 24))),
 	)
-	taxTotal = float64(totalTax + totalTax + SocialSecurity + Medicare )
+	taxTotal = float64(fedTotalTax + stateTotalTax + SocialSecurity + Medicare )
 	TakeHome =	float64(c.Salary/24) - taxTotal - float64(insuranceTotal)
 	afterCost := TakeHome - float64(monthlyCost/ 2)
 
