@@ -1,4 +1,4 @@
-# callit
+# paycheck
 My Salary Calculator
 
 ```
