@@ -42,8 +42,7 @@ func BracketCalc(c *configurator.Config, p *print.Print) {
 	fedTaxableSalary := int64(c.Salary) - int64(c.Federal["StandardDeduction"])
 	stateTaxableSalary := int64(c.Salary) - int64(c.StatedDeduction)
 
-	fmt.Printf(print.ClearScreen)
-	fmt.Printf("\t%s Before taxes: %s\n",
+	fmt.Printf("\n\t%s Before taxes: %s\n",
 		p.PrintLine(print.Green, 23),
 		p.PrintLine(print.Green, 22),
 	)

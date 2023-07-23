@@ -38,6 +38,7 @@ func main() {
 	time.Sleep(1 * time.Second)
 	s.Stop()
 
+	fmt.Printf(print.ClearScreen)
 	// get the configurations values
 	// calculate.ShowCalc(c, p)
 	calculate.BracketCalc(c, p)
