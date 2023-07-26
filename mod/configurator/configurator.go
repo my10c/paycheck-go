@@ -214,8 +214,6 @@ func (c *Config) InitializeArgs(p *print.Print) {
 	c.Insurance["401k"], _		= strconv.ParseFloat(*costPension, 64)
 	c.Insurance["LongTerm"], _	= strconv.ParseFloat(*costLongTerm, 64)
 	c.Insurance["Life"], _		= strconv.ParseFloat(*costLife, 64)
-
-	fmt.Printf(" -> %v <-\n\n", insuranceSet)
 }
 
 // function to add the values to the Config object from the configuration file
