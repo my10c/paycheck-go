@@ -64,6 +64,8 @@ var (
 	stateSet		bool
 	houseSet		bool
 	carSet			bool
+	noInsuranceSet	bool
+	insuranceSet	map[string]bool
 )
 
 // function to initialize the configuration
@@ -75,6 +77,7 @@ func Configurator() *Config {
 }
 
 func (c *Config) InitializeArgs(p *print.Print) {
+	insuranceSet = make(map[string]bool)
 
 	i := is.New()
 
@@ -116,6 +119,48 @@ func (c *Config) InitializeArgs(p *print.Print) {
 			Help:		"The monthly cars payment",
 		})
 
+	costMedical := parser.String("M", "medical",
+		&argparse.Options{
+			Required:	false,
+			Help:		"Bi-weekly medical insurance cost",
+		})
+
+	costPension := parser.String("P", "pension",
+		&argparse.Options{
+			Required:	false,
+			Help:		"Bi-weekly 401k contribution",
+		})
+
+	costVision := parser.String("V", "vision",
+		&argparse.Options{
+			Required:	false,
+			Help:		"Bi-weekly vision insurance cost",
+		})
+
+	costDental := parser.String("D", "dental",
+		&argparse.Options{
+			Required:	false,
+			Help:		"Bi-weekly dental insurance cost",
+		})
+
+	costLife := parser.String("L", "life",
+		&argparse.Options{
+			Required:	false,
+			Help:		"Bi-weekly life insurance cost",
+		})
+
+	costLongTerm := parser.String("T", "longterm",
+		&argparse.Options{
+			Required:	false,
+			Help:		"Bi-weekly long term disability insurance cost",
+		})
+
+	noInsurance := parser.Flag("N", "noinsurance",
+		&argparse.Options{
+			Required:	false,
+			Help:		"No insurance cost nor contibution to 401k",
+		})
+
 	showVersion := parser.Flag("v", "version",
 		&argparse.Options{
 		Required:	false,
@@ -142,6 +187,14 @@ func (c *Config) InitializeArgs(p *print.Print) {
 	stateSet		= parser.GetArgs()[4].GetParsed()
 	houseSet		= parser.GetArgs()[5].GetParsed()
 	carSet			= parser.GetArgs()[6].GetParsed()
+	noInsuranceSet	= *noInsurance
+
+	insuranceSet["Medical"]		= parser.GetArgs()[7].GetParsed()
+	insuranceSet["401k"]		= parser.GetArgs()[8].GetParsed()
+	insuranceSet["Vision"]		= parser.GetArgs()[9].GetParsed()
+	insuranceSet["Dental"]		= parser.GetArgs()[10].GetParsed()
+	insuranceSet["Life"]		= parser.GetArgs()[11].GetParsed()
+	insuranceSet["LongTerm"]	= parser.GetArgs()[12].GetParsed()
 
 	if _, ok, _ := i.IsExist(*configFile, "file"); !ok {
 		p.PrintRed("Configuration file " + *configFile + " does not exist\n")
@@ -154,6 +207,15 @@ func (c *Config) InitializeArgs(p *print.Print) {
 	c.CostCar, _	= strconv.ParseFloat(*costCar, 64)
 	c.ConfigFile	= *configFile
 	c.State			= strings.ToLower(*state)
+	// insurances
+	c.Insurance["Medical"], _	= strconv.ParseFloat(*costMedical, 64)
+	c.Insurance["Dental"], _	= strconv.ParseFloat(*costDental, 64)
+	c.Insurance["Vision"], _	= strconv.ParseFloat(*costVision, 64)
+	c.Insurance["401k"], _		= strconv.ParseFloat(*costPension, 64)
+	c.Insurance["LongTerm"], _	= strconv.ParseFloat(*costLongTerm, 64)
+	c.Insurance["Life"], _		= strconv.ParseFloat(*costLife, 64)
+
+	fmt.Printf(" -> %v <-\n\n", insuranceSet)
 }
 
 // function to add the values to the Config object from the configuration file
@@ -244,7 +306,13 @@ func (c *Config) SetCalculationSettings(p *print.Print) {
 
 	// set the insurances cost
 	for field, _ := range configValues.Insurance {
-		c.Insurance[field] = configValues.Insurance[field]
+		if !noInsuranceSet {
+			if !insuranceSet[field] {
+				c.Insurance[field] = configValues.Insurance[field]
+			}
+		} else {
+			c.Insurance[field] = 0
+		}
 	}
 
 	// get the state Standard Deduction and PersonalExemption
