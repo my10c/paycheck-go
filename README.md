@@ -4,24 +4,34 @@ My Salary Calculator
 ```
 usage: paycheck [-h|--help] [-c|--configFile "<value>"] [-S|--salary "<value>"]
                 [-m|--maxsalary "<value>"] [-s|--state "<value>"] [-H|--house
-                "<value>"] [-C|--car "<value>"] [-v|--version]
+                "<value>"] [-C|--car "<value>"] [-M|--medical "<value>"]
+                [-P|--pension "<value>"] [-V|--vision "<value>"] [-D|--dental
+                "<value>"] [-L|--life "<value>"] [-T|--longterm "<value>"]
+                [-N|--noinsurance] [-v|--version]
 
                 Simple script to calculate bi-weekly salary before and after
                 tax 😁
 
 Arguments:
 
-  -h  --help        Print help information
-  -c  --configFile  Configuration file to be use. Default:
-                    /usr/local/etc/paycheck/paycheck.conf
-  -S  --salary      The yearly salary before tax, required if not set in the
-                    configuration file
-  -m  --maxsalary   The maximum allowed salary value
-  -s  --state       The state where taxes is collected, required if not set in
-                    the configuration file
-  -H  --house       The monthly house rent/mortgage
-  -C  --car         The monthly cars payment
-  -v  --version     Show version
+  -h  --help         Print help information
+  -c  --configFile   Configuration file to be use. Default:
+                     /usr/local/etc/paycheck/paycheck.conf
+  -S  --salary       The yearly salary before tax, required if not set in the
+                     configuration file
+  -m  --maxsalary    The maximum allowed salary value
+  -s  --state        The state where taxes is collected, required if not set in
+                     the configuration file
+  -H  --house        The monthly house rent/mortgage
+  -C  --car          The monthly cars payment
+  -M  --medical      Bi-weekly medical insurance cost
+  -P  --pension      Bi-weekly 401k contribution
+  -V  --vision       Bi-weekly vision insurance cost
+  -D  --dental       Bi-weekly dental insurance cost
+  -L  --life         Bi-weekly life insurance cost
+  -T  --longterm     Bi-weekly long term disability insurance cost
+  -N  --noinsurance  No insurance cost nor contibution to 401k
+  -v  --version      Show version
 ```
 
 #### Example
@@ -47,7 +57,7 @@ __** The TAX schedule brackets in the example might not be 100% accurate  **__
 - Insurance is Pre-Tax 
 - Taxable income is use base on the Standard Deduction for Married Filing Jointly 
 - Taxable income is use to calculate the State taxes! __** could be wrong for other states then CO **__
-- The results are approximately, the result in reality should be a bit higher 
+- The results are approximately, the result in reality should be a higher 
 
 
 ### Build or run the code the code
