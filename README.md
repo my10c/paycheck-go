@@ -7,7 +7,7 @@ usage: paycheck [-h|--help] [-c|--configFile "<value>"] [-S|--salary "<value>"]
                 "<value>"] [-C|--car "<value>"] [-M|--medical "<value>"]
                 [-P|--pension "<value>"] [-V|--vision "<value>"] [-D|--dental
                 "<value>"] [-L|--life "<value>"] [-T|--longterm "<value>"]
-                [-N|--noinsurance] [-v|--version]
+                [-N|--noinsurance] [-X|--adjustment <float>] [-v|--version]
 
                 Simple script to calculate bi-weekly salary before and after
                 tax 😁
@@ -31,6 +31,7 @@ Arguments:
   -L  --life         Bi-weekly life insurance cost
   -T  --longterm     Bi-weekly long term disability insurance cost
   -N  --noinsurance  No insurance cost nor contibution to 401k
+  -X  --adjustment   Adjustment to the calculation in %, (suggestion 2.0 - 3.0)
   -v  --version      Show version
 ```
 

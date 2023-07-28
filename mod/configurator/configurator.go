@@ -1,3 +1,5 @@
+// build linux, darwin
+
 //
 // BSD 3-Clause License
 //
@@ -36,6 +38,7 @@ type (
 		FederalBracket		[][]float64
 		StateBracket		[][]float64
 		StatedDeduction		float64
+		Adjustment			float64
 	}
 
 	State struct {
@@ -54,6 +57,7 @@ type (
 		State		map[string]State	`toml:"state"`
 		Federal		map[string]float64	`toml:"federal"`
 		Bracket		map[string]Bracket	`toml:"bracket"`
+		Adjustment	map[string]float64	`toml:"adjustment"`
 	}
 )
 
@@ -65,6 +69,7 @@ var (
 	houseSet		bool
 	carSet			bool
 	noInsuranceSet	bool
+	adjustmentSet	bool
 	insuranceSet	map[string]bool
 )
 
@@ -161,6 +166,12 @@ func (c *Config) InitializeArgs(p *print.Print) {
 			Help:		"No insurance cost nor contibution to 401k",
 		})
 
+	aproxAdjustment := parser.Float("X", "adjustment",
+		&argparse.Options{
+			Required:	false,
+			Help:		"Adjustment to the calculation in %, (suggestion 2.0 - 3.0)",
+		})
+
 	showVersion := parser.Flag("v", "version",
 		&argparse.Options{
 		Required:	false,
@@ -187,7 +198,6 @@ func (c *Config) InitializeArgs(p *print.Print) {
 	stateSet		= parser.GetArgs()[4].GetParsed()
 	houseSet		= parser.GetArgs()[5].GetParsed()
 	carSet			= parser.GetArgs()[6].GetParsed()
-	noInsuranceSet	= *noInsurance
 
 	insuranceSet["Medical"]		= parser.GetArgs()[7].GetParsed()
 	insuranceSet["401k"]		= parser.GetArgs()[8].GetParsed()
@@ -195,6 +205,9 @@ func (c *Config) InitializeArgs(p *print.Print) {
 	insuranceSet["Dental"]		= parser.GetArgs()[10].GetParsed()
 	insuranceSet["Life"]		= parser.GetArgs()[11].GetParsed()
 	insuranceSet["LongTerm"]	= parser.GetArgs()[12].GetParsed()
+
+	noInsuranceSet	= *noInsurance // 13th position
+	adjustmentSet				= parser.GetArgs()[14].GetParsed()
 
 	if _, ok, _ := i.IsExist(*configFile, "file"); !ok {
 		p.PrintRed("Configuration file " + *configFile + " does not exist\n")
@@ -214,6 +227,8 @@ func (c *Config) InitializeArgs(p *print.Print) {
 	c.Insurance["401k"], _		= strconv.ParseFloat(*costPension, 64)
 	c.Insurance["LongTerm"], _	= strconv.ParseFloat(*costLongTerm, 64)
 	c.Insurance["Life"], _		= strconv.ParseFloat(*costLife, 64)
+	// adjustment
+	c.Adjustment = *aproxAdjustment
 }
 
 // function to add the values to the Config object from the configuration file
@@ -311,6 +326,11 @@ func (c *Config) SetCalculationSettings(p *print.Print) {
 		} else {
 			c.Insurance[field] = 0
 		}
+	}
+
+	// set adjustmentm if given in the CLI we ignore the one from the configuration file
+	if !adjustmentSet {
+		c.Adjustment = configValues.Adjustment["adjustment"]
 	}
 
 	// get the state Standard Deduction and PersonalExemption

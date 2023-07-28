@@ -179,6 +179,8 @@ func BracketCalc(c *configurator.Config, p *print.Print) {
 	taxTotal = float64(fedTotalTax + stateTotalTax + SocialSecurity + Medicare )
 	TakeHome =	float64(c.Salary/24) - taxTotal - float64(insuranceTotal)
 	afterCost := TakeHome - float64(monthlyCost/ 2)
+	// adjustment
+	TakeHome = (TakeHome * (100 + c.Adjustment)) / 100
 
 	// to make adjustment easier
 	fmt.Printf("\n\t%s\n", p.PrintLine(print.Purple, 60))	
@@ -194,6 +196,7 @@ func BracketCalc(c *configurator.Config, p *print.Print) {
 		format.Format(int64(TakeHome * 24)),
 		format.Format(int64(afterCost * 24)),
 	)
+	p.PrintYellow(fmt.Sprintf("\tAdjust by +%.2f%%\n", c.Adjustment))
 	p.PrintGreen(fmt.Sprintf("\t(approx.) Bring home salary: \t    / After house and car payment:\n"))
 	p.PrintGreen(fmt.Sprintf("\t\t bi-weekly : %s\n", biWeekly))
 	p.PrintGreen(fmt.Sprintf("\t\t monthly   : %s\n", monthly))
