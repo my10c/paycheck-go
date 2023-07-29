@@ -1,5 +1,3 @@
-// build linux, darwin
-
 //
 // BSD 3-Clause License
 //
@@ -39,6 +37,7 @@ type (
 		StateBracket		[][]float64
 		StatedDeduction		float64
 		Adjustment			float64
+		ExtraIncome			float64
 	}
 
 	State struct {
@@ -70,6 +69,7 @@ var (
 	carSet			bool
 	noInsuranceSet	bool
 	adjustmentSet	bool
+	extraIncomeSet	bool
 	insuranceSet	map[string]bool
 )
 
@@ -166,10 +166,16 @@ func (c *Config) InitializeArgs(p *print.Print) {
 			Help:		"No insurance cost nor contibution to 401k",
 		})
 
-	aproxAdjustment := parser.Float("X", "adjustment",
+	aproxAdjustment := parser.Float("A", "adjustment",
 		&argparse.Options{
 			Required:	false,
 			Help:		"Adjustment to the calculation in %, (suggestion 2.0 - 3.0)",
+		})
+
+	extraIncome := parser.Float("E", "extraincome",
+		&argparse.Options{
+			Required:	false,
+			Help:		"extra imcome per month, should be ater tax!" ,
 		})
 
 	showVersion := parser.Flag("v", "version",
@@ -207,7 +213,8 @@ func (c *Config) InitializeArgs(p *print.Print) {
 	insuranceSet["LongTerm"]	= parser.GetArgs()[12].GetParsed()
 
 	noInsuranceSet	= *noInsurance // 13th position
-	adjustmentSet				= parser.GetArgs()[14].GetParsed()
+	adjustmentSet	= parser.GetArgs()[14].GetParsed()
+	extraIncomeSet	= parser.GetArgs()[15].GetParsed()
 
 	if _, ok, _ := i.IsExist(*configFile, "file"); !ok {
 		p.PrintRed("Configuration file " + *configFile + " does not exist\n")
@@ -229,6 +236,7 @@ func (c *Config) InitializeArgs(p *print.Print) {
 	c.Insurance["Life"], _		= strconv.ParseFloat(*costLife, 64)
 	// adjustment
 	c.Adjustment = *aproxAdjustment
+	c.ExtraIncome = *extraIncome
 }
 
 // function to add the values to the Config object from the configuration file
@@ -331,6 +339,11 @@ func (c *Config) SetCalculationSettings(p *print.Print) {
 	// set adjustmentm if given in the CLI we ignore the one from the configuration file
 	if !adjustmentSet {
 		c.Adjustment = configValues.Adjustment["adjustment"]
+	}
+	// overwrite extraIncome if it was given by cli
+	// if not set in both configuration and cli it will default to 0
+	if !extraIncomeSet {
+		c.ExtraIncome = configValues.Adjustment["extraIncome"]
 	}
 
 	// get the state Standard Deduction and PersonalExemption

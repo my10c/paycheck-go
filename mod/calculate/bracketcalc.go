@@ -43,8 +43,8 @@ func BracketCalc(c *configurator.Config, p *print.Print) {
 	stateTaxableSalary := int64(c.Salary) - int64(c.StatedDeduction)
 
 	fmt.Printf("\n\t%s Before taxes: %s\n",
-		p.PrintLine(print.Green, 23),
-		p.PrintLine(print.Green, 22),
+		p.PrintLine(print.Green, 25),
+		p.PrintLine(print.Green, 24),
 	)
 
 	p.PrintGreen(fmt.Sprintf("\tYearly salary\t\t  $%12s\n",
@@ -70,9 +70,9 @@ func BracketCalc(c *configurator.Config, p *print.Print) {
 
 	p.PrintYellow(
 		fmt.Sprintf("\n\t%s Federal, State (%s) and Medicare: %s\n\t\t\t\t  bi-weekly / monthly  / yearly\n",
-		p.PrintLine(print.Yellow, 13),
+		p.PrintLine(print.Yellow, 15),
 		strings.ToUpper(c.State),
-		p.PrintLine(print.Yellow, 13)),
+		p.PrintLine(print.Yellow, 15)),
 	)
 
 	for idx, _ = range federalBracket {
@@ -155,8 +155,8 @@ func BracketCalc(c *configurator.Config, p *print.Print) {
 
 	// Insurance
 	fmt.Printf("\n\t%s Insurance and 401K: %s\n\t\t\t\t  bi-weekly / monthly  / yearly\n",
-		p.PrintLine(print.Blue, 20),
-		p.PrintLine(print.Blue, 20),
+		p.PrintLine(print.Blue, 22),
+		p.PrintLine(print.Blue, 22),
 	)
 	insuranceTotal = 0
 	var insuranceCost int64
@@ -179,24 +179,29 @@ func BracketCalc(c *configurator.Config, p *print.Print) {
 	taxTotal = float64(fedTotalTax + stateTotalTax + SocialSecurity + Medicare )
 	TakeHome =	float64(c.Salary/24) - taxTotal - float64(insuranceTotal)
 	afterCost := TakeHome - float64(monthlyCost/ 2)
-	// adjustment
+	// adjustment and possible extra income
 	TakeHome = (TakeHome * (100 + c.Adjustment)) / 100
 
 	// to make adjustment easier
-	fmt.Printf("\n\t%s\n", p.PrintLine(print.Purple, 60))	
+	fmt.Printf("\n\t%s\n", p.PrintLine(print.Purple, 64))	
 	biWeekly := fmt.Sprintf("\t$ %8s  / $ %8s",
-		format.Format(int64(TakeHome)),
-		format.Format(int64(afterCost)),
+		format.Format(int64(TakeHome + (c.ExtraIncome/2))),
+		format.Format(int64(afterCost +(c.ExtraIncome/2))),
 	)
 	monthly := fmt.Sprintf("\t$ %8s  / $ %8s",
-		format.Format(int64(TakeHome * 2)),
-		format.Format(int64(afterCost * 2)),
+		format.Format(int64((TakeHome * 2) + c.ExtraIncome)),
+		format.Format(int64((afterCost * 2) + c.ExtraIncome)),
 	)
 	yearly := fmt.Sprintf("\t$ %8s  / $ %8s",
-		format.Format(int64(TakeHome * 24)),
-		format.Format(int64(afterCost * 24)),
+		format.Format(int64((TakeHome * 24) + (c.ExtraIncome * 12))),
+		format.Format(int64((afterCost * 24) + (c.ExtraIncome * 12))),
 	)
-	p.PrintYellow(fmt.Sprintf("\tAdjust by +%.2f%%\n", c.Adjustment))
+	p.PrintYellow(fmt.Sprintf("\tAdjust by +%.2f%% and extre income $%s monthly, $%s yearly\n",
+		c.Adjustment,
+		format.Format(int64(c.ExtraIncome)),
+		format.Format(int64(c.ExtraIncome * 12))),
+	)
+	p.PrintYellow(fmt.Sprintf("\tinclude the extra income\n"))
 	p.PrintGreen(fmt.Sprintf("\t(approx.) Bring home salary: \t    / After house and car payment:\n"))
 	p.PrintGreen(fmt.Sprintf("\t\t bi-weekly : %s\n", biWeekly))
 	p.PrintGreen(fmt.Sprintf("\t\t monthly   : %s\n", monthly))

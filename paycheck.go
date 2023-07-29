@@ -43,9 +43,9 @@ func main() {
 	// calculate.ShowCalc(c, p)
 	calculate.BracketCalc(c, p)
 
-	fmt.Printf("\t%s\n", p.PrintLine(print.Purple, 60))
+	fmt.Printf("\t%s\n", p.PrintLine(print.Purple, 64))
 	// p.TheEnd()
-	// fmt.Printf("\t%s\n", p.PrintLine(print.Purple, 60))
+	// fmt.Printf("\t%s\n", p.PrintLine(print.Purple, 6j0))
 
 	os.Exit(0)
 }
