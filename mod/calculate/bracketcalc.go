@@ -64,8 +64,10 @@ func BracketCalc(c *configurator.Config, p *print.Print) {
 	p.PrintGreen(fmt.Sprintf("\tBi-weekly salary\t  $%12s\n",
 		format.Format(int64(c.Salary/24))),
 	)
-	p.PrintGreen(fmt.Sprintf("\tMonthly Cost house & car  $%12s\n",
-		format.Format(int64(monthlyCost))),
+	p.PrintGreen(fmt.Sprintf("\tMonthly Cost house & car  $%12s (house: $%4s / car: $%4s) \n",
+		format.Format(int64(monthlyCost)),
+		format.Format(int64(c.CostHouse)),
+		format.Format(int64(c.CostCar))),
 	)
 
 	p.PrintYellow(
