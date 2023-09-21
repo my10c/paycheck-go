@@ -16,7 +16,7 @@ import (
 )
 
 var (
-	MyVersion   = "0.0.3h"
+	MyVersion   = "0.0.3i"
 	now         = time.Now()
 	MyProgname  = path.Base(os.Args[0])
 	myAuthor    = "Luc Suryo"

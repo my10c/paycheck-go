@@ -199,7 +199,7 @@ func BracketCalc(c *configurator.Config, p *print.Print) {
 		format.Format(int64((TakeHome * 24) + (c.ExtraIncome * 12))),
 		format.Format(int64((afterCost * 24) + (c.ExtraIncome * 12))),
 	)
-	p.PrintYellow(fmt.Sprintf("\tAdjust by +%.2f%% and extre income $%s monthly, $%s yearly\n",
+	p.PrintYellow(fmt.Sprintf("\tAdjust by +%.2f%% and extra income $%s monthly, $%s yearly\n",
 		c.Adjustment,
 		format.Format(int64(c.ExtraIncome)),
 		format.Format(int64(c.ExtraIncome * 12))),
